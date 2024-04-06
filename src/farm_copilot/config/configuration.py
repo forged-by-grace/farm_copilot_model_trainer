@@ -17,8 +17,8 @@ class ConfigurationManager:
 
         create_directories([self.config.artifacts_root])
     
-   
-    def get_prepared_base_model_config(self) -> PrepareBaseModelConfig:
+    
+    def get_prepare_base_model_config(self) -> PrepareBaseModelConfig:
         config = self.config.prepare_base_model
 
         create_directories([config.root_dir])
@@ -29,14 +29,14 @@ class ConfigurationManager:
             base_model_path=Path(config.base_model_path),
             updated_base_model_path=Path(config.updated_base_model_path),
             params_image_size=self.params.IMAGE_SIZE,
+            params_input_shape=self.params.INPUT_SHAPE,
             params_learning_rate=self.params.LEARNING_RATE,
             params_include_top=self.params.INCLUDE_TOP,
             params_weights=self.params.WEIGHTS,
             params_offset=self.params.OFFSET,
         )
 
-        return prepare_base_model_config  
-
+        return prepare_base_model_config
 
     def get_prepare_data_config(self) -> PrepareDataConfig:
         training_data = Path(self.config.data_ingestion.local_data_file)
