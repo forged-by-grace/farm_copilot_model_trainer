@@ -1,0 +1,53 @@
+stages:  
+  prepare_base_model:
+    cmd: python src/farm_copilot/pipeline/stage_01_prepare_base_model.py
+    deps:
+      - src/farm_copilot/pipeline/stage_01_prepare_base_model.py
+      - config/config.yaml
+    params:
+      - IMAGE_SIZE
+      - INCLUDE_TOP
+      - CLASSES
+      - WEIGHTS
+      - LEARNING_RATE
+      - OFFSET
+      - INPUT_SHAPE
+    outs:
+      - artifacts/prepare_base_model
+  
+
+  prepare_data:
+    cmd: python src/farm_copilot/pipeline/stage_02_prepare_data.py
+    deps:
+      - src/farm_copilot/pipeline/stage_02_prepare_data.py
+      - config/config.yaml
+    
+
+  training:
+    cmd: python src/farm_copilot/pipeline/stage_03_model_trainer.py
+    deps:
+      - src/cnnClassifier/pipeline/stage_03_model_trainer.py
+      - config/config.yaml
+      - artifacts/prepare_base_model
+    params:
+      - IMAGE_SIZE
+      - EPOCHS
+      - BATCH_SIZE
+      - AUGMENTATION
+    outs:
+      - artifacts/training/model.h5
+
+
+  evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_04_model_evaluation.py
+    deps:
+      - src/cnnClassifier/pipeline/stage_04_model_evaluation.py
+      - config/config.yaml
+      - artifacts/data_ingestion/Chest-CT-Scan-data
+      - artifacts/training/model.h5
+    params:
+      - IMAGE_SIZE
+      - BATCH_SIZE
+    metrics:
+    - scores.json:
+        cache: false

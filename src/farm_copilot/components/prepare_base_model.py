@@ -1,5 +1,5 @@
 import os
-import keras
+from tensorflow import keras
 from src.farm_copilot.entity.config_entity import PrepareBaseModelConfig
 from pathlib import Path
 
@@ -60,3 +60,4 @@ class PrepareBaseModel:
     def save_model(path: Path, model: keras.Model):
         keras.saving.save_model(model=model, filepath=path)
         
+

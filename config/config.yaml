@@ -2,7 +2,9 @@ artifacts_root: artifacts
 
 
 data_ingestion:
-  local_data_file: artifacts/datasets/farm_copilot_dataset
+  train_dataset: artifacts/datasets/train
+  validation_dataset: artifacts/datasets/val
+  test_dataset: artifacts/datasets/test
 
 
 prepare_base_model:
@@ -14,4 +16,11 @@ prepare_base_model:
 training:
   root_dir: artifacts/training
   trained_model_path: artifacts/training/model.keras
+
+
+evaluation:
+  root_dir: artifacts/evaluation
+  path_of_model: artifacts/training/model.keras
+  mlflow_uri: https://dagshub.com/forged-by-grace/farm_copilot_model_trainer.mlflow
+  path_to_eval_score: artifacts/evaluation/score.json
 

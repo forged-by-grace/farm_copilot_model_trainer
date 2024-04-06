@@ -1,7 +1,7 @@
 import os
 from farm_copilot.constants import *
 from farm_copilot.utils.common import read_yaml, create_directories
-from farm_copilot.entity.config_entity import (DataIngestionConfig,
+from farm_copilot.entity.config_entity import (PrepareDataConfig,
                                                 PrepareBaseModelConfig,
                                                 TrainingConfig,
                                                 EvaluationConfig)
@@ -38,39 +38,58 @@ class ConfigurationManager:
         return prepare_base_model_config  
 
 
+    def get_prepare_data_config(self) -> PrepareDataConfig:
+        training_data = Path(self.config.data_ingestion.local_data_file)
+
+        prepare_data_config = PrepareDataConfig(training_data=training_data)
+
+        return prepare_data_config
+
+
     def get_training_config(self) -> TrainingConfig:
         training = self.config.training
-        prepare_base_model = self.config.prepare_base_model
+        prepared_base_model = self.config.prepare_base_model
         params = self.params
-        training_data = os.path.join(self.config.data_ingestion.unzip_dir, "Chest-CT-Scan-data")
-        create_directories([
-            Path(training.root_dir)
-        ])
+        training_data_path = Path(self.config.data_ingestion.train_dataset)
+        val_data_path = Path(self.config.data_ingestion.validation_dataset)
+
+        create_directories([Path(training.root_dir)])
 
         training_config = TrainingConfig(
             root_dir=Path(training.root_dir),
             trained_model_path=Path(training.trained_model_path),
-            updated_base_model_path=Path(prepare_base_model.updated_base_model_path),
-            training_data=Path(training_data),
+            updated_base_model_path=Path(prepared_base_model.updated_base_model_path),
+            training_ds_path=training_data_path,
+            validation_ds_path=val_data_path,
             params_epochs=params.EPOCHS,
             params_batch_size=params.BATCH_SIZE,
             params_is_augmentation=params.AUGMENTATION,
-            params_image_size=params.IMAGE_SIZE
+            params_image_size=params.IMAGE_SIZE,
+            params_train_split=params.TRAIN_SPLIT,
+            params_test_split=params.TEST_SPLIT,
+            params_validation_split=params.VALIDATION_SPLIT
         )
 
-        return training_config
-    
-
+        return training_config 
 
 
     def get_evaluation_config(self) -> EvaluationConfig:
+        evaluation = self.config.evaluation
+        test_ds_path = Path(self.config.data_ingestion.test_dataset)
+
+        create_directories([Path(evaluation.root_dir)])
+
         eval_config = EvaluationConfig(
-            path_of_model="artifacts/training/model.h5",
-            training_data="artifacts/data_ingestion/Chest-CT-Scan-data",
-            mlflow_uri="https://dagshub.com/entbappy/chest-Disease-Classification-MLflow-DVC.mlflow",
+            path_of_model=Path(evaluation.path_of_model),
+            test_ds_path=test_ds_path,
+            mlflow_uri=evaluation.mlflow_uri,
+            path_to_eval_score=Path(evaluation.path_to_eval_score),
             all_params=self.params,
             params_image_size=self.params.IMAGE_SIZE,
-            params_batch_size=self.params.BATCH_SIZE
+            params_batch_size=self.params.BATCH_SIZE,
+            params_test_split=self.params.TEST_SPLIT,
+            params_train_split=self.params.TRAIN_SPLIT,
+            params_validation_split=self.params.VALIDATION_SPLIT
         )
         return eval_config
 
